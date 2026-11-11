@@ -1,0 +1,65 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+// --- TERMINALES (Vienen de JFlex) ---
+terminal INT, BOOL, VOID, MAIN, RETURN, TRUE, FALSE, IF, ELSE, WHILE;
+terminal MAS, POR, IGUAL, PYC, PAR_IZQ, PAR_DER, LLA_IZQ, LLA_DER;
+terminal String ID;
+terminal Integer NRO;
+
+// --- NO TERMINALES CON TIPOS PARA EL AST ---
+non terminal NodoMain programa, main_func;
+non terminal String tipo_retorno, tipo_dato;
+non terminal ArrayList<NodoDeclaracion> lista_declaraciones;
+non terminal NodoDeclaracion declaracion;
+non terminal ArrayList<Sentencia> lista_sentencias;
+non terminal Sentencia sentencia;
+non terminal Expresion expresion;
+
+// --- PRECEDENCIA ---
+precedence left MAS;
+precedence left POR;
+
+// --- GRAMÁTICA CON CONSTRUCCIÓN DEL AST ---
+
+programa ::= main_func:m {: RESULT = m; :} ;
+
+main_func ::= tipo_retorno:tr MAIN PAR_IZQ PAR_DER LLA_IZQ lista_declaraciones:ld lista_sentencias:ls LLA_DER
+            {: RESULT = new NodoMain(tr, ld, ls); :} ;
+
+tipo_retorno ::= INT {: RESULT = "int"; :}
+               | BOOL {: RESULT = "bool"; :}
+               | VOID {: RESULT = "void"; :} ;
+
+tipo_dato ::= INT {: RESULT = "int"; :}
+            | BOOL {: RESULT = "bool"; :} ;
+
+lista_declaraciones ::= declaracion:d
+                      {: ArrayList<NodoDeclaracion> l = new ArrayList<>(); l.add(d); RESULT = l; :}
+                      | lista_declaraciones:l declaracion:d
+                      {: l.add(d); RESULT = l; :} ;
+
+declaracion ::= tipo_dato:t ID:i PYC {: RESULT = new NodoDeclaracion(t, i); :} ;
+
+lista_sentencias ::= lista_sentencias:l sentencia:s
+                   {: l.add(s); RESULT = l; :}
+                   | /* vacío */
+                   {: RESULT = new ArrayList<Sentencia>(); :} ;
+
+sentencia ::= ID:i IGUAL expresion:e PYC {: RESULT = new NodoAsignacion(i, e); :}
+            | RETURN expresion:e PYC     {: RESULT = new NodoReturn(e); :}
+            | RETURN PYC                 {: RESULT = new NodoReturn(null); :}
+            | IF PAR_IZQ expresion:c PAR_DER LLA_IZQ lista_sentencias:e LLA_DER
+              {: RESULT = new NodoIf(c, e, null); :}
+            | IF PAR_IZQ expresion:c PAR_DER LLA_IZQ lista_sentencias:e LLA_DER ELSE LLA_IZQ lista_sentencias:s LLA_DER
+              {: RESULT = new NodoIf(c, e, s); :}
+            | WHILE PAR_IZQ expresion:c PAR_DER LLA_IZQ lista_sentencias:b LLA_DER
+              {: RESULT = new NodoWhile(c, b); :} ;
+
+expresion ::= expresion:e1 MAS expresion:e2 {: RESULT = new NodoOperacion(e1, "+", e2); :}
+            | expresion:e1 POR expresion:e2 {: RESULT = new NodoOperacion(e1, "*", e2); :}
+            | PAR_IZQ expresion:e PAR_DER   {: RESULT = e; :}
+            | NRO:n                         {: RESULT = new NodoNumero(n); :}
+            | ID:i                          {: RESULT = new NodoIdentificador(i); :}
+            | TRUE                          {: RESULT = new NodoBooleano(true); :}
+            | FALSE                         {: RESULT = new NodoBooleano(false); :} ;

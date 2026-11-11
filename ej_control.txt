@@ -1,0 +1,12 @@
+int main(){
+  int x; int i; bool seguir; bool b;
+  x = 0; i = 0; seguir = true; b = false;
+  while (seguir) {
+    x = x + 2 * 3;
+    i = i + 1;
+    if (b) { seguir = false; } else { b = true; }
+  }
+  if (true) { x = x + 1; }
+  if (false) { x = 0; } else { i = i * 10; }
+  return x;
+}

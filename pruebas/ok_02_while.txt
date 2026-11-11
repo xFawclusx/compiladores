@@ -1,0 +1,10 @@
+int main(){
+  int x; int vueltas; bool a; bool b;
+  x = 1; vueltas = 0; a = true; b = true;
+  while (a) {
+    x = x * 2;
+    vueltas = vueltas + 1;
+    if (b) { b = false; } else { a = false; }
+  }
+  return x + vueltas * 100;
+}

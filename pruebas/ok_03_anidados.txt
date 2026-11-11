@@ -1,0 +1,16 @@
+int main(){
+  int x; bool seguir; bool interno;
+  x = 0; seguir = true;
+  while (seguir) {
+    interno = true;
+    while (interno) {
+      x = x + 1;
+      interno = false;
+    }
+    if (true) {
+      if (false) { x = 0; } else { x = x + 10; }
+    }
+    seguir = false;
+  }
+  return x;
+}
